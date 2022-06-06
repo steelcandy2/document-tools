@@ -1,0 +1,113 @@
+#+title: document-tools
+#+date: <2022-06-03 Fri 16:58>
+#+description: README file for the 'document-tools' program.
+
+This is the =document-tools= Python program, which generates a single
+[[https://orgmode.org][org mode]] file documenting
+
+  - all of the bash aliases and shell functions defined in all of the files
+    that are specified, and
+  - all of the scripts contained in all of the directories that are
+    specified,
+
+provided that they don't run afoul of our limitations. Which are that we
+assume that:
+
+  - all bash shell function definitions start with the optional =function=
+    keyword
+  - no shell comment and no line's indentation - that is, the consecutive
+    whitespace at the start of a line - contains a tab character
+    - we only check for them in lines whose indentation or comments we're
+      interested in, but we reserve the right to change which lines those
+      are, so you should make sure you never use them in comments or
+      indentation if you plan to use this program
+    - we terminate immediately upon encountering a tab where we forbid them
+  - bash shell function definitions end with a closing brace at the start of
+    a line that's indented the same amount or less than the first line of
+    the definition (that is, the line that starts with the =function=
+    keyword)
+    - we also assume that such closing braces don't occur in 'here' documents
+      or anywhere else that would require sophisticated parsing to determine
+      that it's not a "real" closing brace with the appropriate indentation
+  - bash shell function definitions don't contain other alias or shell
+    function definitions (though I'm not even sure that either is allowed in
+    bash)
+
+Note that the existence of one or more 'cycles' among shell aliases that just
+rename other aliases or functions can result in our generating an org mode
+document that cannot be exported to other formats (due to unresolvable
+links).
+
+While the resulting org mode file is arguably the most useful format for the
+generated documentation, it is also possible to [[https://orgmode.org/manual/Exporting.html][export]] it to other formats,
+including more common ones like HTML, PDF and plain text.
+
+** Documentation Comments
+
+The shell comments from which =document-tools= extracts documentation must be
+in specific locations and be of specific forms:
+
+  - the comments from which we extract documentation are
+    - all of the comments indented underneath an alias definition,
+    - all of the comments that immediately precede a shell function
+      definition, and
+    - the comment block at the start of a script (ignoring any 'shebang'
+      line)
+  - there cannot be blank lines between an alias or function definition and
+    the comments that document them: if there are then they won't be
+    considered to be comments that document the alias or function
+  - there cannot be blank lines among the comments that document something,
+    though there can be *blank comment lines* (that is, lines that start with
+    a - possibly indented - comment character followed by nothing but zero
+    or more whitespace characters)
+    - if there are blank lines then the comment lines will be considered to
+      be two or more separate comment blocks and so won't be considered to be
+      part of the documentation of the same thing (alias definition, function
+      definition, etc.)
+  - the comment lines that document something are split into paragraphs on
+    blank comment lines
+    - two or more consecutive blank comment lines are warned about, but are
+      otherwise treated as a single blank comment line in this case
+  - comment lines that start with 2 consecutive comment characters will be
+    included in both the summary and full description of the thing that they
+    document
+  - comment lines that start with any other number of comment characters
+    will only be included in the full description of the thing that they
+    document, though those starting with 3 or more comment characters will
+    be warned about
+  - as noted in the limitations above, comments cannot contain tabs
+  - comment lines whose consecutive comment characters are followed by
+    two or more consecutive spaces are included verbatim in the
+    documentation that we generate
+  - comment lines whose consecutive comment characters are followed by
+    exactly one space are flowed together with any and all other such
+    comment lines immediately before and after them into a single paragraph
+    in the documentation that we generate
+
+Below is the formal documentation for =document-tools=. There should
+eventually be a [[https://blog0.steelcandy.org/][blog post]] giving a more informal and expansive introduction
+to the program.
+
+#+begin_example
+usage: document-tools [-h|-q|-s|-v] [-P] file...
+#+end_example
+
+If the '=-h=' option is specified then this usage message is
+output to standard output and we exit with exit code 0.
+
+Otherwise we generate documentation of all of the bash aliases
+and shell functions defined in all of the files in '=file...=', as
+well as of all of the scripts - and symbolic links to scripts -
+in all of the directories in '=file...='.
+
+By default all notes, warnings and errors are written to
+standard error. But if the '=-v=' option is specified then
+informational messages are written there as well, if the '=-q='
+option is specified then only warnings and errors are reported,
+and if the '=-s=' option is specified then nothing will ever be
+reported.
+
+If the '=-P=' option is specified then in the generated document
+as many local file links as possible will be into one of my
+=scripts.org= files (and so this option can be ignored by most
+people).
