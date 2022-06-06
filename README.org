@@ -84,6 +84,8 @@ in specific locations and be of specific forms:
     comment lines immediately before and after them into a single paragraph
     in the documentation that we generate
 
+** Usage
+
 Below is the formal documentation for =document-tools=. There should
 eventually be a [[https://blog0.steelcandy.org/][blog post]] giving a more informal and expansive introduction
 to the program.
